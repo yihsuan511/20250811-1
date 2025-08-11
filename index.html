@@ -554,7 +554,7 @@
       price: item.price
     }));
 
-    fetch('https://two0250811-1.onrender.com/api/orders', {
+    fetch('https://two0250811-2.onrender.com/api/orders', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -615,13 +615,13 @@
       try {
         let response;
         if (type === "register") {
-          response = await fetch('https://two0250811-1.onrender.com/api/member/register', {
+          response = await fetch('https://two0250811-2.onrender.com/api/member/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name, phone, password })
           });
         } else {
-          response = await fetch('https://two0250811-1.onrender.com/api/member/login', {
+          response = await fetch('https://two0250811-2.onrender.com/api/member/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ phone, password })
@@ -700,3 +700,4 @@
   </body>
 
 </html>
+
