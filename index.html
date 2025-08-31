@@ -285,20 +285,45 @@ for (const category in menuData) {
         customization = { 麵條: noodle, 碗型: size, 辣度: spicy };
       }
 
-      const itemTotal = (item.price + extraPrice) * qty;
-      const orderItem = {
-        name: item.name,
-        price: item.price + extraPrice,
-        quantity: qty,
-        customization,
-        text: `${item.name}${customizationText} x ${qty} = ${itemTotal} 元`,
-      };
+      const finalPrice = item.price + extraPrice;
+        
+        // 檢查是否已存在相同的品項（包含完全相同的客製化選項）
+        const existingItemIndex = orderList.findIndex(orderItem => 
+          orderItem.name === item.name && 
+          orderItem.price === finalPrice &&
+          areCustomizationsEqual(orderItem.customization, customization)
+        );
 
-      orderList.push(orderItem);
-      renderCart();
-    });
-  });
-}
+        if (existingItemIndex !== -1) {
+          // 如果找到相同品項，則合併數量
+          orderList[existingItemIndex].quantity += qty;
+          
+          // 更新顯示文字
+          const totalItemPrice = orderList[existingItemIndex].price * orderList[existingItemIndex].quantity;
+          orderList[existingItemIndex].text = `${item.name}${customizationText} x ${orderList[existingItemIndex].quantity} = ${totalItemPrice} 元`;
+        } else {
+          // 如果沒有找到相同品項，則新增
+          const itemTotal = finalPrice * qty;
+          const orderItem = {
+            name: item.name,
+            price: finalPrice,
+            quantity: qty,
+            customization,
+            text: `${item.name}${customizationText} x ${qty} = ${itemTotal} 元`,
+          };
+          orderList.push(orderItem);
+        }
+
+        renderCart();
+        });
+      });
+    }
+      function areCustomizationsEqual(c1, c2) {
+    const keys1 = Object.keys(c1);
+    const keys2 = Object.keys(c2);
+    if (keys1.length !== keys2.length) return false;
+    return keys1.every(key => c1[key] === c2[key]);
+  }
 
 function renderCart() {
   selectedItems.innerHTML = '';
@@ -577,4 +602,3 @@ refreshWaiting();
 </script>
 </body>
 </html>
-
