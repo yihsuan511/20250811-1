@@ -182,7 +182,7 @@ let orderList = [];
 let currentUser = null;
 
 // 候位資訊
-// async function refreshWaiting() {
+ async function refreshWaiting() {
 //   try {
 //     waitInfo.textContent = '讀取中...';
 //     const res = await fetch(`${API_BASE}/api/waiting-count`);
@@ -196,7 +196,8 @@ let currentUser = null;
 //     waitInfo.textContent = '無法取得候位資訊，請稍後再試。';
 //     console.error(e);
 //   }
-//  }
+  return;
+  }
 
 // 每 15 秒刷新一次
 setInterval(refreshWaiting, 15000);
@@ -602,4 +603,5 @@ refreshWaiting();
 </script>
 </body>
 </html>
+
 
