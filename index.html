@@ -115,7 +115,7 @@
   <button id="backToTopBtn" title="回到頂部">↑</button>
 
       <!-- 候位資訊 -->
-      <div id="waitInfo" class="wait-box">讀取中...</div>
+      <!--<div id="waitInfo" class="wait-box">讀取中...</div>-->
 
       <!-- 桌號 -->
       <div class="table-selection" id="tableSection">
@@ -182,21 +182,21 @@ let orderList = [];
 let currentUser = null;
 
 // 候位資訊
-async function refreshWaiting() {
-  try {
-    waitInfo.textContent = '讀取中...';
-    const res = await fetch(`${API_BASE}/api/waiting-count`);
-    const data = await res.json();
-    const { waitingCount, seatedCount, availableTables, maxTables } = data;
-    waitInfo.textContent =
-      availableTables > 0
-        ? `目前可安排入座：${availableTables} 桌（總桌數：${maxTables}）。目前候位：${waitingCount} 組。`
-        : `目前客滿，候位：${waitingCount} 組（總桌數：${maxTables}，已就座：${seatedCount}）。送出訂單後會告訴你你的候位順序。`;
-  } catch (e) {
-    waitInfo.textContent = '無法取得候位資訊，請稍後再試。';
-    console.error(e);
-  }
-}
+// async function refreshWaiting() {
+//   try {
+//     waitInfo.textContent = '讀取中...';
+//     const res = await fetch(`${API_BASE}/api/waiting-count`);
+//     const data = await res.json();
+//     const { waitingCount, seatedCount, availableTables, maxTables } = data;
+//     waitInfo.textContent =
+//       availableTables > 0
+//         ? `目前可安排入座：${availableTables} 桌（總桌數：${maxTables}）。目前候位：${waitingCount} 組。`
+//         : `目前客滿，候位：${waitingCount} 組（總桌數：${maxTables}，已就座：${seatedCount}）。送出訂單後會告訴你你的候位順序。`;
+//   } catch (e) {
+//     waitInfo.textContent = '無法取得候位資訊，請稍後再試。';
+//     console.error(e);
+//   }
+//  }
 
 // 每 15 秒刷新一次
 setInterval(refreshWaiting, 15000);
@@ -602,3 +602,4 @@ refreshWaiting();
 </script>
 </body>
 </html>
+
