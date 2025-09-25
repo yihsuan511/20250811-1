@@ -346,7 +346,7 @@ function renderCart() {
 refreshWaiting();
 
   // 定義送出訂單的函式
-    async function submitOrder() {
+    async function submitOrder(pickup_time) {
       if (!currentUser) { alert("請先登入會員"); return; }
       if (orderList.length === 0) { alert("請先加入餐點"); return; }
 
@@ -369,7 +369,8 @@ refreshWaiting();
             total_price: total,
             dining_type: '內用',
             table_number: tableNumber,
-            phone: currentUser.phone
+            phone: currentUser.phone,
+            pickup_time: pickup_time
           })
         });
 
@@ -396,8 +397,21 @@ refreshWaiting();
       }
     }
 
-    // 綁定送出按鈕（只需要一次）
+    // 綁定送出按鈕
     document.getElementById("submitOrder").addEventListener("click", async () => {
+
+      // 檢查是否選擇了預約時間
+      if (!reservationDate.value || !reservationTime.value) {
+        alert("請選擇取餐日期和時間！");
+        return;
+      }
+      
+      const reservationDateTime = new Date(`${reservationDate.value}T${reservationTime.value}:00`);
+      const taiwanOffset = 8 * 60;
+      const pickup_time = `${reservationDate.value}T${reservationTime.value}:00+08:00`;  //傳送給後端，包含正確時區資訊
+      const pickup_display = `${reservationDate.value} ${reservationTime.value}:00`; // 用於前端顯示，保持原本用戶選擇的時間格式
+      console.log('預約取餐時間:', pickup_time); // 除錯用
+      
       if (!currentUser) {
         if (confirm("需要先會員登入才能送出訂單，是否要立即登入？")) {
           openModal('login');
@@ -418,7 +432,7 @@ refreshWaiting();
 
       if (!confirm("確認送出以下訂單？\n\n" + confirmText)) return;
 
-      await submitOrder();
+      await submitOrder(pickup_time);
 
       // 成功後清空購物車與刷新
       orderList = [];
@@ -517,7 +531,7 @@ refreshWaiting();
 
   function showOrderModal(orderId, total, items = []) {
   document.getElementById("orderNumber").textContent = `訂單編號：#${orderId}`;
-  document.getElementById("pickupTime").textContent = `預估取餐時間：約 15~20 分鐘`;
+  document.getElementById("pickupTime").textContent = `預估完成時間：約 15~20 分鐘`;
 
   let detailsHtml = "<ul>";
   items.forEach(i => {
@@ -602,7 +616,3 @@ refreshWaiting();
 </script>
 </body>
 </html>
-
-
-
-
