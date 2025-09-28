@@ -114,46 +114,76 @@
 
   <button id="backToTopBtn" title="回到頂部">↑</button>
 
-      <!-- 候位資訊 -->
-      <!--<div id="waitInfo" class="wait-box">讀取中...</div>-->
-
       <!-- 桌號 -->
-      <div class="table-selection" id="tableSection">
-        <h3>🪑 桌號安排(依現場狀況進行帶位）</h3>
-        <select id="tableSelect" class="table-dropdown">
-          <option value="">待分配</option>
-          <option value="1">1號桌</option>
-          <option value="2">2號桌</option>
-          <option value="3">3號桌</option>
-          <option value="4">4號桌</option>
-          <option value="5">5號桌</option>
-          <option value="6">6號桌</option>
-          <option value="7">7號桌</option>
-        </select>
-      </div>
+<div class="table-selection" id="tableSection">
+  <h3>🪑 桌號安排 (依現場狀況進行帶位)</h3>
+  <select id="tableSelect" class="table-dropdown">
+    <option value="">待分配</option>
+    <option value="1">1號桌</option>
+    <option value="2">2號桌</option>
+    <option value="3">3號桌</option>
+    <option value="4">4號桌</option>
+    <option value="5">5號桌</option>
+    <option value="6">6號桌</option>
+    <option value="7">7號桌</option>
+  </select>
+</div>
 
-               <!-- 點餐方式選擇 -->
-    <div class="reservation-section">
-      <h3>選擇點餐方式</h3>
-      <div class="reservation-input">
-        <label>
-          <input type="radio" name="diningMode" value="reservation" checked>
-          🕒 預約內用
-        </label>
-        <label>
-          <input type="radio" name="diningMode" value="instant">
-          ⚡ 即時點餐
-        </label>
-      </div>
-    </div>
-    <!-- 時間選擇區塊 -->
-    <div class="reservation-section" id="reservationSection">
-      <h3>選擇用餐日期與時間</h3>
-      <div class="reservation-input">
-        <input type="date" id="reservationDate" />
-        <select id="reservationTime"></select>
-      </div>
-    </div>
+<!-- 點餐方式選擇 -->
+<div class="reservation-section">
+  <h3>選擇點餐方式</h3>
+  <div class="reservation-input">
+    <label>
+      <input type="radio" name="diningMode" value="reservation" checked>
+      🕒 預約內用
+    </label>
+    <label>
+      <input type="radio" name="diningMode" value="instant">
+      ⚡ 即時點餐
+    </label>
+  </div>
+</div>
+
+<!-- 時間選擇區塊 -->
+<div class="reservation-section" id="reservationSection">
+  <h3>選擇用餐日期與時間</h3>
+  <div class="reservation-input">
+    <input type="date" id="reservationDate" />
+    <select id="reservationTime"></select>
+  </div>
+</div>
+
+<script>
+  const diningRadios = document.querySelectorAll('input[name="diningMode"]');
+  const tableSection = document.getElementById('tableSection'); // 桌號區塊
+/*   const reservationSection = document.getElementById('reservationSection'); // 日期時間區塊 */
+
+  function updateSections(mode) {
+    if (mode === 'reservation') {
+      // 預約內用：隱藏桌號，顯示日期/時間
+      tableSection.style.display = 'none';
+      reservationSection.style.display = 'block';
+    } else if (mode === 'instant') {
+      // 即時點餐：顯示桌號，隱藏日期/時間
+      tableSection.style.display = 'block';
+      reservationSection.style.display = 'none';
+    }
+  }
+
+  // 初始化：依照目前勾選的值
+  const checkedMode = document.querySelector('input[name="diningMode"]:checked').value;
+  updateSections(checkedMode);
+
+  // 監聽切換
+  diningRadios.forEach(radio => {
+    radio.addEventListener('change', () => {
+      if (radio.checked) {
+        updateSections(radio.value);
+      }
+    });
+  });
+</script>
+
 
       <!-- 菜單 -->
       <div id="menuItems"></div>
