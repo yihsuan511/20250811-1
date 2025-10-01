@@ -160,13 +160,18 @@
 
   function updateSections(mode) {
     if (mode === 'reservation') {
-      // 預約內用：隱藏桌號，顯示日期/時間
+      // 預約內用:隱藏桌號,顯示日期/時間
       tableSection.style.display = 'none';
       reservationSection.style.display = 'block';
+      // 重置桌號為待分配
+      tableSelect.value = '';
     } else if (mode === 'instant') {
-      // 即時點餐：顯示桌號，隱藏日期/時間
+      // 即時點餐:顯示桌號,隱藏日期/時間
       tableSection.style.display = 'block';
       reservationSection.style.display = 'none';
+      // 重置日期時間為現在
+      generateDateOptions();
+      generateTimeOptions(reservationDate.value);
     }
   }
 
