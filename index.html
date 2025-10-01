@@ -170,6 +170,7 @@
       tableSection.style.display = 'block';
       reservationSection.style.display = 'none';
       // 重置日期時間為現在
+      reservationDate.innerHTML = ''; // 先清空日期時間
       generateDateOptions();
       generateTimeOptions(reservationDate.value);
     }
