@@ -151,6 +151,8 @@
     <select id="reservationDate"></select>
     <select id="reservationTime"></select>
   </div>
+  <!-- 加上這行 -->
+  <div id="capacityInfo" style="margin-top: 10px; padding: 10px; border-radius: 8px; font-weight: bold; display: none;"></div>
 </div>
 
 <script>
@@ -435,19 +437,47 @@ refreshWaiting();
 
     // 綁定送出按鈕
     document.getElementById("submitOrder").addEventListener("click", async () => {
-
-      // 檢查是否選擇了預約時間
-      if (!reservationDate.value || !reservationTime.value) {
-        alert("請選擇取餐日期和時間！");
+  // 先檢查點餐方式
+  const diningMode = document.querySelector('input[name="diningMode"]:checked').value;
+  
+  let pickup_time;
+  
+  if (diningMode === 'reservation') {
+    // 預約內用：需要檢查時間和容量
+    if (!reservationDate.value || !reservationTime.value) {
+      alert("請選擇取餐日期和時間！");
+      return;
+    }
+    
+    pickup_time = `${reservationDate.value}T${reservationTime.value}:00+08:00`;
+    console.log('預約取餐時間:', pickup_time);
+    
+    // 送出前再次檢查容量
+    try {
+      const res = await fetch(`${API_BASE}/api/orders/check-capacity?pickup_time=${encodeURIComponent(pickup_time)}`);
+      const data = await res.json();
+      
+      if (!data.canAcceptOrders) {
+        alert(`⚠️ 抱歉！此時段已達上限（${data.current_orders}/${data.limit} 組）\n請選擇其他時間預約`);
+        return; // 檔掉訂單
+      }
+    } catch (error) {
+      console.error("容量檢查失敗:", error);
+      if (!confirm("無法確認時段容量，是否仍要繼續送出訂單？")) {
         return;
       }
-      
-      const reservationDateTime = new Date(`${reservationDate.value}T${reservationTime.value}:00`);
-      const taiwanOffset = 8 * 60;
-      const pickup_time = `${reservationDate.value}T${reservationTime.value}:00+08:00`;  //傳送給後端，包含正確時區資訊
-      const pickup_display = `${reservationDate.value} ${reservationTime.value}:00`; // 用於前端顯示，保持原本用戶選擇的時間格式
-      console.log('預約取餐時間:', pickup_time); // 除錯用
-      
+    }
+  } else {
+    // 即時點餐：使用當前時間，不檢查容量
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hour = String(now.getHours()).padStart(2, '0');
+    const minute = String(now.getMinutes()).padStart(2, '0');
+    pickup_time = `${year}-${month}-${day}T${hour}:${minute}:00+08:00`;
+    console.log('即時點餐時間:', pickup_time);
+  }
       if (!currentUser) {
         if (confirm("需要先會員登入才能送出訂單，是否要立即登入？")) {
           openModal('login');
@@ -675,8 +705,56 @@ refreshWaiting();
 
     // 當日期改變時,重新生成時間
     reservationDate.addEventListener("change", () => {
-    generateTimeOptions(reservationDate.value);
-    });
+  generateTimeOptions(reservationDate.value);
+  checkTimeSlotCapacity(); // 加上這行
+});
+
+// 當時間改變時也要檢查
+reservationTime.addEventListener("change", () => {
+  checkTimeSlotCapacity(); // 加上這行
+});
+
+// 檢查時段容量的函數（即時顯示在時間選擇下方）
+async function checkTimeSlotCapacity() {
+  const capacityInfo = document.getElementById("capacityInfo");
+  
+  if (!reservationDate.value || !reservationTime.value) {
+    capacityInfo.style.display = "none";
+    return;
+  }
+
+  const pickup_time = `${reservationDate.value}T${reservationTime.value}:00+08:00`;
+  
+  try {
+    capacityInfo.style.display = "block";
+    capacityInfo.style.background = "#f0f0f0";
+    capacityInfo.style.color = "#666";
+    capacityInfo.textContent = "⏳ 檢查中...";
+
+    const res = await fetch(`${API_BASE}/api/orders/check-capacity?pickup_time=${encodeURIComponent(pickup_time)}`);
+    const data = await res.json();
+
+    if (data.canAcceptOrders) {
+      capacityInfo.style.background = "#d4edda";
+      capacityInfo.style.color = "#155724";
+      capacityInfo.textContent = `✅ ${data.message}（${data.current_orders}/${data.limit} 組）`;
+    } else {
+      capacityInfo.style.background = "#f8d7da";
+      capacityInfo.style.color = "#721c24";
+      capacityInfo.textContent = `❌ ${data.message}（${data.current_orders}/${data.limit} 組）`;
+    }
+  } catch (error) {
+    console.error("檢查容量失敗:", error);
+    capacityInfo.style.background = "#fff3cd";
+    capacityInfo.style.color = "#856404";
+    capacityInfo.textContent = "⚠️ 無法檢查時段容量，請稍後再試";
+  }
+}
+
+// 初始化後檢查預設時間的容量
+setTimeout(() => {
+  checkTimeSlotCapacity();
+}, 100);
 
     // 點餐方式切換
       const diningModeRadios = document.getElementsByName("diningMode");
