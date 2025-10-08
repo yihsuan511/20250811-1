@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <title>牛肉麵點餐系統（內用+候位）</title>
+  <title>吃得飽牛肉麵 — 內用預約點餐</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #f7f7f7; margin: 0; padding: 10px; }
@@ -157,8 +157,8 @@
 
 <script>
   const diningRadios = document.querySelectorAll('input[name="diningMode"]');
-  const tableSection = document.getElementById('tableSection'); // 桌號區塊
-/*   const reservationSection = document.getElementById('reservationSection'); // 日期時間區塊 */
+  const tableSection = document.getElementById('tableSection');
+  const reservationSection = document.getElementById('reservationSection');
 
   function updateSections(mode) {
     if (mode === 'reservation') {
@@ -178,18 +178,46 @@
     }
   }
 
-  // 初始化：依照目前勾選的值
+  // 初始化：依照目前勾選的值，但如果營業時間已過，強制使用預約模式
   const checkedMode = document.querySelector('input[name="diningMode"]:checked').value;
-  updateSections(checkedMode);
+  
+  // 頁面載入時檢查：如果預設是即時點餐但已過營業時間，改為預約
+  if (checkedMode === 'instant' && !checkBusinessHours()) {
+    document.querySelector('input[name="diningMode"][value="reservation"]').checked = true;
+    updateSections('reservation');
+  } else {
+    updateSections(checkedMode);
+  }
 
-  // 監聽切換
+ // 檢查營業時間的函數
+  function checkBusinessHours() {
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    
+    // 營業時間: 11:00 - 20:00
+    const isOpen = (currentHour > 11 || (currentHour === 11 && currentMinute >= 0)) 
+                   && (currentHour < 20 || (currentHour === 20 && currentMinute === 0));
+    
+    return isOpen;
+  }
+
   diningRadios.forEach(radio => {
     radio.addEventListener('change', () => {
       if (radio.checked) {
+        // 如果選擇即時點餐，先檢查營業時間
+        if (radio.value === 'instant' && !checkBusinessHours()) {
+          alert('⏰ 今日營業時間已過\n營業時間：11:00 - 20:00\n請明日再訪或選擇預約內用點餐，謝謝您！');
+          // 自動切回預約內用選項
+          document.querySelector('input[name="diningMode"][value="reservation"]').checked = true;
+          updateSections('reservation');
+          return;
+        }
         updateSections(radio.value);
       }
     });
   });
+
 </script>
 
 
@@ -437,73 +465,73 @@ refreshWaiting();
 
     // 綁定送出按鈕
     document.getElementById("submitOrder").addEventListener("click", async () => {
-  // 先檢查點餐方式
-  const diningMode = document.querySelector('input[name="diningMode"]:checked').value;
-  
-  let pickup_time;
-  
-  if (diningMode === 'reservation') {
-    // 預約內用：需要檢查時間和容量
-    if (!reservationDate.value || !reservationTime.value) {
-      alert("請選擇取餐日期和時間！");
-      return;
-    }
-    
-    pickup_time = `${reservationDate.value}T${reservationTime.value}:00+08:00`;
-    console.log('預約取餐時間:', pickup_time);
-    
-    // 送出前再次檢查容量
-    try {
-      const res = await fetch(`${API_BASE}/api/orders/check-capacity?pickup_time=${encodeURIComponent(pickup_time)}`);
-      const data = await res.json();
+      // 先檢查點餐方式
+      const diningMode = document.querySelector('input[name="diningMode"]:checked').value;
       
-      if (!data.canAcceptOrders) {
-        alert(`⚠️ 抱歉！此時段已達上限（${data.current_orders}/${data.limit} 組）\n請選擇其他時間預約`);
-        return; // 檔掉訂單
-      }
-    } catch (error) {
-      console.error("容量檢查失敗:", error);
-      if (!confirm("無法確認時段容量，是否仍要繼續送出訂單？")) {
-        return;
-      }
-    }
-  } else {
-    // 即時點餐：使用當前時間，不檢查容量
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const hour = String(now.getHours()).padStart(2, '0');
-    const minute = String(now.getMinutes()).padStart(2, '0');
-    pickup_time = `${year}-${month}-${day}T${hour}:${minute}:00+08:00`;
-    console.log('即時點餐時間:', pickup_time);
-  }
-      if (!currentUser) {
-        if (confirm("需要先會員登入才能送出訂單，是否要立即登入？")) {
-          openModal('login');
+      let pickup_time;
+      
+      if (diningMode === 'reservation') {
+        // 預約內用：需要檢查時間和容量
+        if (!reservationDate.value || !reservationTime.value) {
+          alert("請選擇取餐日期和時間！");
+          return;
         }
-        return;
+        
+        pickup_time = `${reservationDate.value}T${reservationTime.value}:00+08:00`;
+        console.log('預約取餐時間:', pickup_time);
+        
+        // 送出前再次檢查容量
+        try {
+          const res = await fetch(`${API_BASE}/api/orders/check-capacity?pickup_time=${encodeURIComponent(pickup_time)}`);
+          const data = await res.json();
+          
+          if (!data.canAcceptOrders) {
+            alert(`⚠️ 抱歉！此時段已達上限（${data.current_orders}/${data.limit} 組）\n請選擇其他時間預約`);
+            return; // 檔掉訂單
+          }
+        } catch (error) {
+          console.error("容量檢查失敗:", error);
+          if (!confirm("無法確認時段容量，是否仍要繼續送出訂單？")) {
+            return;
+          }
+        }
+      } else {
+        // 即時點餐：使用當前時間，不檢查容量
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hour = String(now.getHours()).padStart(2, '0');
+        const minute = String(now.getMinutes()).padStart(2, '0');
+        pickup_time = `${year}-${month}-${day}T${hour}:${minute}:00+08:00`;
+        console.log('即時點餐時間:', pickup_time);
       }
-      if (orderList.length === 0) {
-        alert("請先加入至少一項餐點！");
-        return;
-      }
+          if (!currentUser) {
+            if (confirm("需要先會員登入才能送出訂單，是否要立即登入？")) {
+              openModal('login');
+            }
+            return;
+          }
+          if (orderList.length === 0) {
+            alert("請先加入至少一項餐點！");
+            return;
+          }
 
-      const total = orderList.reduce((sum, i) => sum + i.price * i.quantity, 0);
-      const tableNumber = tableSelect.value || null;
-      const confirmText = `桌號：${tableNumber || '待分配'}\n\n`
-        + `到店時間：${reservationDate.value} ${reservationTime.value}\n\n`
-        + orderList.map(i => i.text).join('\n')
-        + `\n\n總價：${total} 元`;
+          const total = orderList.reduce((sum, i) => sum + i.price * i.quantity, 0);
+          const tableNumber = tableSelect.value || null;
+          const confirmText = `桌號：${tableNumber || '待分配'}\n\n`
+            + `到店時間：${reservationDate.value} ${reservationTime.value}\n\n`
+            + orderList.map(i => i.text).join('\n')
+            + `\n\n總價：${total} 元`;
 
-      if (!confirm("確認送出以下訂單？\n\n" + confirmText)) return;
+          if (!confirm("確認送出以下訂單？\n\n" + confirmText)) return;
 
-      await submitOrder(pickup_time);
+          await submitOrder(pickup_time);
 
-      // 成功後清空購物車與刷新
-      orderList = [];
-      renderCart();
-      refreshWaiting();
+          // 成功後清空購物車與刷新
+          orderList = [];
+          renderCart();
+          refreshWaiting();
     });
 
     // 回頂部按鈕
@@ -630,7 +658,7 @@ refreshWaiting();
         
         const month = date.getMonth() + 1;
         const day = date.getDate();
-        const dateStr = date.toISOString().split("T")[0]; // YYYY-MM-DD 格式
+        const dateStr = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`; // YYYY-MM-DD 格式
         
         let displayText;
         if (i === 0) {
@@ -757,18 +785,18 @@ setTimeout(() => {
 }, 100);
 
     // 點餐方式切換
-      const diningModeRadios = document.getElementsByName("diningMode");
-      const reservationSection = document.getElementById("reservationSection");
+      // const diningModeRadios = document.getElementsByName("diningMode");
+      // const reservationSection = document.getElementById("reservationSection");
 
-      diningModeRadios.forEach(radio => {
-        radio.addEventListener("change", () => {
-          if (radio.value === "reservation") {
-            reservationSection.style.display = "block";
-          } else {
-            reservationSection.style.display = "none";
-          }
-        });
-      });
+      // diningModeRadios.forEach(radio => {
+      //   radio.addEventListener("change", () => {
+      //     if (radio.value === "reservation") {
+      //       reservationSection.style.display = "block";
+      //     } else {
+      //       reservationSection.style.display = "none";
+      //     }
+      //   });
+      // });
 
     // 初始化登入狀態
     if (sessionStorage.getItem("phone") && sessionStorage.getItem("name")) {
