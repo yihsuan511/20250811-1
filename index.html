@@ -765,11 +765,11 @@ async function checkTimeSlotCapacity() {
     if (data.canAcceptOrders) {
       capacityInfo.style.background = "#d4edda";
       capacityInfo.style.color = "#155724";
-      capacityInfo.textContent = `✅ ${data.message}（${data.current_orders}/${data.limit} 組）`;
+      capacityInfo.textContent = `✅ ${data.message} 目前 ${data.current_orders}/${data.limit} 組`;
     } else {
       capacityInfo.style.background = "#f8d7da";
       capacityInfo.style.color = "#721c24";
-      capacityInfo.textContent = `❌ ${data.message}（${data.current_orders}/${data.limit} 組）`;
+      capacityInfo.textContent = `❌ ${data.message} 目前 ${data.current_orders}/${data.limit} 組`;
     }
   } catch (error) {
     console.error("檢查容量失敗:", error);
@@ -806,3 +806,4 @@ setTimeout(() => {
 </script>
 </body>
 </html>
+
