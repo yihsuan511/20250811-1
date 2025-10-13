@@ -247,6 +247,8 @@ const reservationTime = document.getElementById("reservationTime");
 let orderList = [];
 let currentUser = null;
 
+sessionStorage.setItem("lastPage", window.location.pathname);
+  
 // 候位資訊
  async function refreshWaiting() {
 //   try {
@@ -844,5 +846,6 @@ setTimeout(() => {
 </script>
 </body>
 </html>
+
 
 
