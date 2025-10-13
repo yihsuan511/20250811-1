@@ -246,7 +246,8 @@ const reservationTime = document.getElementById("reservationTime");
 let orderList = [];
 let currentUser = null;
 
-sessionStorage.setItem("lastPage", window.location.pathname);
+ // 標記來源為外帶
+    localStorage.setItem("historySource", "內用");
 
 // 候位資訊
  async function refreshWaiting() {
