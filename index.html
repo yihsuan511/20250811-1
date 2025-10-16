@@ -849,11 +849,13 @@ refreshWaiting();
 
       if (reorderParam) {
         try {
-          // URL-safe Base64 → 標準 Base64
+          // ✅ 將 URL-safe Base64 轉回標準 Base64
           let base64 = reorderParam.replace(/-/g, '+').replace(/_/g, '/');
-          while (base64.length % 4) base64 += '=';
+          while (base64.length % 4) {
+            base64 += '=';
+          }
 
-          // Base64 → UTF-8 → JSON
+          // ✅ Base64 → UTF-8 → JSON
           const bytes = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
           const decoded = new TextDecoder().decode(bytes);
           const items = JSON.parse(decoded);
@@ -861,20 +863,14 @@ refreshWaiting();
           if (Array.isArray(items) && items.length > 0) {
             items.forEach(item => addTakeoutItemToCart(item));
             renderCart();
-
-            if (!reorderAlertShown) {
-              alert("已將歷史訂單加入購物車！");
-              reorderAlertShown = true;
-            }
-
-            // 清除 URL 參數，避免重複載入
+            alert("已將歷史訂單加入購物車！");
             window.history.replaceState({}, document.title, window.location.pathname);
           }
         } catch (e) {
           console.error("讀取 URL reorder 資料失敗", e);
           alert("讀取歷史訂單失敗，請重新點餐。");
         }
-      }else {
+      } else {
         // localStorage 再次訂購保險機制
         const reorderData = localStorage.getItem("reorderItems");
         if (reorderData) {
@@ -923,5 +919,3 @@ refreshWaiting();
   </script>
 </body>
 </html>
-
-
