@@ -249,6 +249,11 @@ let currentUser = null;
  // 標記來源為內用
     localStorage.setItem("historySource", "內用");
 
+    if(sessionStorage.getItem("phone")){
+      localStorage.setItem("tempPhone", sessionStorage.getItem("phone"));
+      localStorage.setItem("tempName", sessionStorage.getItem("name"));
+    }
+  
 // 候位資訊
  async function refreshWaiting() {
 //   try {
@@ -824,6 +829,20 @@ setTimeout(() => {
     window.onload = () => {
       renderCart(); // 先渲染現有的購物車
 
+      if(localStorage.getItem("tempPhone")){
+        currentUser = {
+          phone: localStorage.getItem("tempPhone"),
+          name: localStorage.getItem("tempName")
+        };
+        sessionStorage.setItem("phone", currentUser.phone);
+        sessionStorage.setItem("name", currentUser.name);
+        updateAuthUI();
+
+        //清除臨時資料
+        localStorage.removeItem("tempPhone");
+        localStorage.removeItem("tempName");
+      }
+
       // 檢查是否有從歷史訂單帶過來的資料
       const urlParams = new URLSearchParams(window.location.search);
       const reorderParam = urlParams.get('reorder');
@@ -895,3 +914,4 @@ setTimeout(() => {
 </script>
 </body>
 </html>
+
