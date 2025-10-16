@@ -253,7 +253,7 @@ let currentUser = null;
       localStorage.setItem("tempPhone", sessionStorage.getItem("phone"));
       localStorage.setItem("tempName", sessionStorage.getItem("name"));
     }
-  
+
 // 候位資訊
  async function refreshWaiting() {
 //   try {
@@ -610,7 +610,7 @@ refreshWaiting();
           <div class="dropdown">
             <button>歡迎回來！${currentUser.name}</button>
             <div class="dropdown-content">
-              <a href="https://two0250921-history.onrender.com?phone=${currentUser.phone}">🧾 歷史訂單</a>
+              <a href="https://two0250921-history.onrender.com?phone=${currentUser.phone}&source=內用">🧾 歷史訂單</a>
               <a href="https://two0250811-3.onrender.com?phone=${currentUser.phone}">📝 編輯會員資料</a>
               <a href="#" onclick="logout()">🚪 登出</a>
             </div>
@@ -630,20 +630,20 @@ refreshWaiting();
       updateAuthUI();
     }
 
-  function showOrderModal(orderId, total, items = []) {
-  document.getElementById("orderNumber").textContent = `訂單編號：#${orderId}`;
-  document.getElementById("pickupTime").textContent = `預估完成時間：約 15~20 分鐘`;
+    function showOrderModal(orderId, total, items = []) {
+      document.getElementById("orderNumber").textContent = `訂單編號：#${orderId}`;
+      document.getElementById("pickupTime").textContent = `預估完成時間：約 15~20 分鐘`;
 
-  let detailsHtml = "<ul>";
-  items.forEach(i => {
-    detailsHtml += `<li>${i.item_name} x ${i.quantity} - ${i.price} 元</li>`;
-  });
-  detailsHtml += "</ul>";
-  document.getElementById("orderDetails").innerHTML = detailsHtml;
+      let detailsHtml = "<ul>";
+      items.forEach(i => {
+        detailsHtml += `<li>${i.item_name} x ${i.quantity} - ${i.price} 元</li>`;
+      });
+      detailsHtml += "</ul>";
+      document.getElementById("orderDetails").innerHTML = detailsHtml;
 
-  document.getElementById("orderTotal").textContent = `總金額：${total} 元`;
-  document.getElementById("orderModal").style.display = "flex";
-}
+      document.getElementById("orderTotal").textContent = `總金額：${total} 元`;
+      document.getElementById("orderModal").style.display = "flex";
+    }
 
     function closeOrderModal() {
       document.getElementById("orderModal").style.display = "none";
@@ -734,92 +734,92 @@ refreshWaiting();
         }
       }
 
-    // 初始化日期和時間選項
-    generateDateOptions();
-    generateTimeOptions(reservationDate.value);
+      // 初始化日期和時間選項
+      generateDateOptions();
+      generateTimeOptions(reservationDate.value);
 
-    // 當日期改變時,重新生成時間
-    reservationDate.addEventListener("change", () => {
-  generateTimeOptions(reservationDate.value);
-  checkTimeSlotCapacity(); // 加上這行
-});
-
-// 當時間改變時也要檢查
-reservationTime.addEventListener("change", () => {
-  checkTimeSlotCapacity(); // 加上這行
-});
-
-// 檢查時段容量的函數（即時顯示在時間選擇下方）
-async function checkTimeSlotCapacity() {
-  const capacityInfo = document.getElementById("capacityInfo");
-  
-  if (!reservationDate.value || !reservationTime.value) {
-    capacityInfo.style.display = "none";
-    return;
-  }
-
-  // ✅ 新的寫法:明確建立台灣時區的 Date 物件
-const localDateTime = `${reservationDate.value}T${reservationTime.value}:00`;
-const pickupDate = new Date(localDateTime);
-
-// 手動調整為台灣時區 (UTC+8)
-// 假設用戶選擇的是台灣當地時間,需要轉換為正確的 UTC
-const taiwanOffset = 8 * 60; // 8小時 = 480分鐘
-const userTimezoneOffset = pickupDate.getTimezoneOffset(); // 用戶時區偏移(分鐘)
-const offsetDiff = taiwanOffset + userTimezoneOffset;
-pickupDate.setMinutes(pickupDate.getMinutes() - offsetDiff);
-
-// 轉換為 ISO 字串傳給後端
-const pickup_time = pickupDate.toISOString();
-
-console.log('用戶選擇的時間:', localDateTime);
-console.log('轉換後的 UTC 時間:', pickup_time);
-  
-  try {
-    capacityInfo.style.display = "block";
-    capacityInfo.style.background = "#f0f0f0";
-    capacityInfo.style.color = "#666";
-    capacityInfo.textContent = "⏳ 檢查中...";
-
-    const res = await fetch(`${API_BASE}/api/orders/check-capacity?pickup_time=${encodeURIComponent(pickup_time)}`);
-    const data = await res.json();
-
-    if (data.canAcceptOrders) {
-      capacityInfo.style.background = "#d4edda";
-      capacityInfo.style.color = "#155724";
-      capacityInfo.textContent = `✅ ${data.message}（${data.current_orders}/${data.limit} 組）`;
-    } else {
-      capacityInfo.style.background = "#f8d7da";
-      capacityInfo.style.color = "#721c24";
-      capacityInfo.textContent = `❌ ${data.message}（${data.current_orders}/${data.limit} 組）`;
-    }
-  } catch (error) {
-    console.error("檢查容量失敗:", error);
-    capacityInfo.style.background = "#fff3cd";
-    capacityInfo.style.color = "#856404";
-    capacityInfo.textContent = "⚠️ 無法檢查時段容量，請稍後再試";
-  }
-}
-
-// 初始化後檢查預設時間的容量
-setTimeout(() => {
-  checkTimeSlotCapacity();
-}, 100);
-
-   /*  // 點餐方式切換
-      const diningModeRadios = document.getElementsByName("diningMode");
-      const reservationSection = document.getElementById("reservationSection");
-
-      diningModeRadios.forEach(radio => {
-        radio.addEventListener("change", () => {
-          if (radio.value === "reservation") {
-            reservationSection.style.display = "block";
-          } else {
-            reservationSection.style.display = "none";
-          }
-        });
+      // 當日期改變時,重新生成時間
+      reservationDate.addEventListener("change", () => {
+        generateTimeOptions(reservationDate.value);
+        checkTimeSlotCapacity(); // 加上這行
       });
- */
+
+      // 當時間改變時也要檢查
+      reservationTime.addEventListener("change", () => {
+        checkTimeSlotCapacity(); // 加上這行
+      });
+
+      // 檢查時段容量的函數（即時顯示在時間選擇下方）
+      async function checkTimeSlotCapacity() {
+        const capacityInfo = document.getElementById("capacityInfo");
+  
+        if (!reservationDate.value || !reservationTime.value) {
+          capacityInfo.style.display = "none";
+          return;
+        }
+
+        // ✅ 新的寫法:明確建立台灣時區的 Date 物件
+        const localDateTime = `${reservationDate.value}T${reservationTime.value}:00`;
+        const pickupDate = new Date(localDateTime);
+
+        // 手動調整為台灣時區 (UTC+8)
+        // 假設用戶選擇的是台灣當地時間,需要轉換為正確的 UTC
+        const taiwanOffset = 8 * 60; // 8小時 = 480分鐘
+        const userTimezoneOffset = pickupDate.getTimezoneOffset(); // 用戶時區偏移(分鐘)
+        const offsetDiff = taiwanOffset + userTimezoneOffset;
+        pickupDate.setMinutes(pickupDate.getMinutes() - offsetDiff);
+
+        // 轉換為 ISO 字串傳給後端
+        const pickup_time = pickupDate.toISOString();
+
+        console.log('用戶選擇的時間:', localDateTime);
+        console.log('轉換後的 UTC 時間:', pickup_time);
+          
+        try {
+          capacityInfo.style.display = "block";
+          capacityInfo.style.background = "#f0f0f0";
+          capacityInfo.style.color = "#666";
+          capacityInfo.textContent = "⏳ 檢查中...";
+
+          const res = await fetch(`${API_BASE}/api/orders/check-capacity?pickup_time=${encodeURIComponent(pickup_time)}`);
+          const data = await res.json();
+
+          if (data.canAcceptOrders) {
+            capacityInfo.style.background = "#d4edda";
+            capacityInfo.style.color = "#155724";
+            capacityInfo.textContent = `✅ ${data.message}（${data.current_orders}/${data.limit} 組）`;
+          } else {
+            capacityInfo.style.background = "#f8d7da";
+            capacityInfo.style.color = "#721c24";
+            capacityInfo.textContent = `❌ ${data.message}（${data.current_orders}/${data.limit} 組）`;
+          }
+        } catch (error) {
+          console.error("檢查容量失敗:", error);
+          capacityInfo.style.background = "#fff3cd";
+          capacityInfo.style.color = "#856404";
+          capacityInfo.textContent = "⚠️ 無法檢查時段容量，請稍後再試";
+        }
+      }
+
+      // 初始化後檢查預設時間的容量
+      setTimeout(() => {
+        checkTimeSlotCapacity();
+      }, 100);
+
+      /*  // 點餐方式切換
+          const diningModeRadios = document.getElementsByName("diningMode");
+          const reservationSection = document.getElementById("reservationSection");
+
+          diningModeRadios.forEach(radio => {
+            radio.addEventListener("change", () => {
+              if (radio.value === "reservation") {
+                reservationSection.style.display = "block";
+              } else {
+                reservationSection.style.display = "none";
+              }
+            });
+          });
+    */
     // 初始化登入狀態
     if (sessionStorage.getItem("phone") && sessionStorage.getItem("name")) {
       currentUser = { phone: sessionStorage.getItem("phone"), name: sessionStorage.getItem("name") };
@@ -842,79 +842,84 @@ setTimeout(() => {
         localStorage.removeItem("tempPhone");
         localStorage.removeItem("tempName");
       }
-
+      
       // 檢查是否有從歷史訂單帶過來的資料
       const urlParams = new URLSearchParams(window.location.search);
-      const reorderParam = urlParams.get('reorder');
+      const reorderParam = urlParams.get("reorder");
 
       if (reorderParam) {
         try {
-          // ✅ 正確的 Base64 解碼順序
-          const decodedBase64 = decodeURIComponent(reorderParam);
-          const decodedJson = atob(decodedBase64);
-          const items = JSON.parse(decodeURIComponent(escape(decodedJson)));
+          // URL-safe Base64 → 標準 Base64
+          let base64 = reorderParam.replace(/-/g, '+').replace(/_/g, '/');
+          while (base64.length % 4) base64 += '=';
+
+          // Base64 → UTF-8 → JSON
+          const bytes = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+          const decoded = new TextDecoder().decode(bytes);
+          const items = JSON.parse(decoded);
 
           if (Array.isArray(items) && items.length > 0) {
-            items.forEach(item => {
-              const customOptions = item.custom_options ? JSON.parse(item.custom_options) : {};
-              const customText = Object.values(customOptions).length
-                ? `（${Object.values(customOptions).join("｜")}）`
-                : "";
-              const itemTotal = item.price * item.quantity;
-              orderList.push({
-                name: item.item_name || item.name,
-                price: item.price,
-                quantity: item.quantity,
-                customization: customOptions,
-                text: `${item.item_name || item.name}${customText} x ${item.quantity} = ${itemTotal} 元`
-              });
-            });
-
+            items.forEach(item => addTakeoutItemToCart(item));
             renderCart();
-            alert("已將歷史訂單加入購物車！");
 
-            // ✅ 清除 URL 參數，避免重複載入
+            if (!reorderAlertShown) {
+              alert("已將歷史訂單加入購物車！");
+              reorderAlertShown = true;
+            }
+
+            // 清除 URL 參數，避免重複載入
             window.history.replaceState({}, document.title, window.location.pathname);
           }
         } catch (e) {
-          console.error("讀取再次訂購資料失敗", e);
-          alert("讀取再次訂購資料失敗，請重新點餐。");
+          console.error("讀取 URL reorder 資料失敗", e);
+          alert("讀取歷史訂單失敗，請重新點餐。");
+        }
+      }else {
+        // localStorage 再次訂購保險機制
+        const reorderData = localStorage.getItem("reorderItems");
+        if (reorderData) {
+          try {
+            const items = JSON.parse(reorderData);
+            items.forEach(item => addTakeoutItemToCart(item));
+            renderCart();
+            alert("已將歷史訂單加入購物車！");
+          } catch (e) {
+            console.error("localStorage 讀取 reorderItems 失敗", e);
+          }
         }
       }
-
-      // 🔁 若是從 localStorage 帶過來的（保險機制）
-      const reorderData = localStorage.getItem("reorderItems");
-      if (reorderData && !reorderParam) {
-        try {
-          const items = JSON.parse(reorderData);
-          items.forEach(item => {
-            const customOptions = item.custom_options ? JSON.parse(item.custom_options) : {};
-            const customText = Object.values(customOptions).length
-              ? `（${Object.values(customOptions).join("｜")}）`
-              : "";
-            const itemTotal = item.price * item.quantity;
-            orderList.push({
-              name: item.item_name || item.name,
-              price: item.price,
-              quantity: item.quantity,
-              customization: customOptions,
-              text: `${item.item_name || item.name}${customText} x ${item.quantity} = ${itemTotal} 元`
-            });
-          });
-
-          renderCart();
-          alert("已將歷史訂單加入購物車！");
-        } catch (e) {
-          console.error("localStorage 讀取失敗", e);
-        }
-      }
-
-      localStorage.removeItem("reorderItems");
     };
-</script>
+        // 將歷史訂單項目加入購物車
+    function addTakeoutItemToCart(item) {
+      let customOptions = {};
+      if (item.custom_options) {
+          if (typeof item.custom_options === "string") {
+              try {
+                  customOptions = JSON.parse(item.custom_options);
+              } catch (e) {
+                  console.warn("custom_options 解析失敗:", item.custom_options);
+                  customOptions = {};
+              }
+          } else if (typeof item.custom_options === "object") {
+              customOptions = item.custom_options;
+          }
+      }
+
+      const customText = Object.values(customOptions).length
+          ? `（${Object.values(customOptions).join("｜")}）`
+          : "";
+
+      const itemTotal = item.price * item.quantity;
+
+      orderList.push({
+          name: item.item_name || item.name,
+          price: item.price,
+          quantity: item.quantity,
+          customization: customOptions,
+          text: `${item.item_name || item.name}${customText} x ${item.quantity} = ${itemTotal} 元`,
+          table_number: tableNumber
+      });
+    }
+  </script>
 </body>
 </html>
-
-
-
-
